@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService{
 
-    private static final String QUALIFICATION_URI = "http://localhost:8083/api/v1/calificacion/usuario/";
-    private static final String HOTEL_URI = "http://localhost:8082/api/v1/hotel/";
+    private static final String QUALIFICATION_URI = "http://QUALIFICATION-SERVICE/api/v1/calificacion/usuario/";
+    private static final String HOTEL_URI = "http://HOTEL-SERVICE/api/v1/hotel/";
 
     private final Logger logger = Logger.getLogger(UserServiceImpl.class.getName());
     private final RestTemplate restTemplate;
