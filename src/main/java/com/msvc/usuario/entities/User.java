@@ -2,10 +2,9 @@ package com.msvc.usuario.entities;
 
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -26,5 +25,8 @@ public class User {
 
     @Column(name="informacion")
     private String information;
+
+    @Transient
+    private List<Calificacion> calificaciones = new ArrayList<>();
 
 }
