@@ -5,6 +5,8 @@ import com.msvc.usuario.entities.Hotel;
 import com.msvc.usuario.entities.User;
 import com.msvc.usuario.exceptions.BadRequestException;
 import com.msvc.usuario.exceptions.ResourceNotFoundException;
+import com.msvc.usuario.externalservices.CalificacionService;
+import com.msvc.usuario.externalservices.HotelService;
 import com.msvc.usuario.repositories.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -25,9 +27,17 @@ public class UserServiceImpl implements UserService{
     private final RestTemplate restTemplate;
     private final UserRepository userRepository;
 
-    public UserServiceImpl(UserRepository userRepository, RestTemplate restTemplate) {
+    private final CalificacionService calificacionService;
+    private final HotelService hotelService;
+
+    public UserServiceImpl(UserRepository userRepository,
+                           RestTemplate restTemplate,
+                           HotelService hotelService,
+                           CalificacionService calificacionService) {
         this.userRepository = userRepository;
         this.restTemplate = restTemplate;
+        this.calificacionService = calificacionService;
+        this.hotelService = hotelService;
     }
 
     @Override
@@ -42,20 +52,26 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->  new ResourceNotFoundException("El id " + userId + " no existe"));
 
-        Calificacion[] userQualifications =
-                restTemplate.getForObject(QUALIFICATION_URI + userId, Calificacion[].class);
+        //with restTemplate
+//        Calificacion[] userQualifications =
+//                restTemplate.getForObject(QUALIFICATION_URI + userId, Calificacion[].class);
+//        List<Calificacion> userQualificationsList = Arrays
+//                .stream(Objects.requireNonNull(userQualifications))
+//                .collect(Collectors.toList());
 
-        List<Calificacion> userQualificationsList = Arrays
-                .stream(Objects.requireNonNull(userQualifications))
-                .collect(Collectors.toList());
+        //with feign
+        List<Calificacion> userQualificationsList = calificacionService.getCalificationByUserId(userId);
 
-        logger.info("UserQualifications"+ userQualifications);
+        logger.info("UserQualifications"+ userQualificationsList);
 
         List<Calificacion> mapUserQualifications = userQualificationsList.stream().map(calificacion -> {
-            ResponseEntity<Hotel> hotelForEntity = restTemplate
-                    .getForEntity(HOTEL_URI + calificacion.getHotelId(), Hotel.class);
+            //with restTemplate
+//            ResponseEntity<Hotel> hotelForEntity = restTemplate
+//                    .getForEntity(HOTEL_URI + calificacion.getHotelId(), Hotel.class);
+//            Hotel hotel = hotelForEntity.getBody();
 
-            Hotel hotel = hotelForEntity.getBody();
+            //with feign
+            Hotel hotel = hotelService.getHotelById(calificacion.getHotelId());
             calificacion.setHotel(hotel);
             return calificacion;
         }).collect(Collectors.toList());
